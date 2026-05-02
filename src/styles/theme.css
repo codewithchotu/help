@@ -241,6 +241,19 @@ input, select, textarea {
   transition: all 0.3s;
 }
 
+/* Fix dropdown options — browsers render these with system bg by default */
+select {
+  background: #1a1a24;
+  color: white;
+  cursor: pointer;
+}
+
+select option {
+  background: #1a1a24;
+  color: white;
+  padding: 10px;
+}
+
 input:focus {
   outline: none;
   border-color: var(--primary);
