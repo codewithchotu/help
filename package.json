@@ -5,7 +5,7 @@
   "scripts": {
     "start": "parcel public/index.html --port 3000 --open",
     "build": "parcel build public/index.html --public-url ./",
-    "postbuild": "cp public/_redirects dist/_redirects || echo 'Redirects copied'"
+    "postbuild": "node -e \"require('fs').copyFileSync('public/_redirects', 'dist/_redirects')\""
   },
   "dependencies": {
     "@react-google-maps/api": "^2.20.7",
