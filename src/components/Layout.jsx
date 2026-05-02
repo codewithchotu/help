@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Droplet, Home, UserPlus, Search, Map as MapIcon, LogOut, Activity } from "lucide-react";
+import logo from "../assets/logo.svg";
 
 export default function Layout({ children }) {
   const navigate = useNavigate();
@@ -21,7 +22,7 @@ export default function Layout({ children }) {
     <div className="app-layout">
       <nav className="navbar">
         <div className="nav-logo" onClick={() => navigate("/home")}>
-          <Droplet className="logo-icon" size={28} />
+          <img src={logo} alt="LifeLine Logo" className="logo-icon" style={{ width: 36, height: 36, borderRadius: 10 }} />
           <span>LifeLine</span>
         </div>
         <div className="nav-links">
