@@ -1,0 +1,57 @@
+/* 🔴 Global Oval Blood Cell Background */
+.blood-bg {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.blood-cell {
+  position: absolute;
+  bottom: -120px;
+  width: 70px;
+  height: 40px;
+  background: radial-gradient(ellipse at center, #ff1a1a 0%, #660000 90%);
+  border-radius: 50% 50% 45% 55% / 55% 50% 45% 50%;
+  opacity: 0.7;
+  animation: floatBlood 12s linear infinite;
+  transform: rotate(25deg);
+}
+
+.blood-cell:nth-child(odd) {
+  width: 85px;
+  height: 45px;
+  animation-duration: 15s;
+}
+
+.blood-cell:nth-child(even) {
+  width: 60px;
+  height: 35px;
+  animation-duration: 11s;
+}
+
+@keyframes floatBlood {
+  0% {
+    transform: translateY(0) rotate(25deg);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(-1200px) rotate(25deg);
+    opacity: 0;
+  }
+}
+
+/* 🔴 Base Page Container */
+.page-container {
+  min-height: 100vh;
+  background: radial-gradient(circle at center, #3b0000 0%, #0d0000 100%);
+  color: white;
+  font-family: "Poppins", sans-serif;
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}

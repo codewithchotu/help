@@ -1,0 +1,92 @@
+.page-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  background: radial-gradient(circle at center, #3b0000 0%, #1a0000 100%);
+  overflow: hidden;
+  color: white;
+  font-family: "Poppins", sans-serif;
+  position: relative;
+  padding: 40px 0;
+}
+
+/* 🔴 Floating oval blood cells */
+.blood-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.blood-cell {
+  position: absolute;
+  bottom: -100px;
+  width: 45px;
+  height: 28px;
+  background: radial-gradient(circle at 30% 30%, #ff4d4d, #660000);
+  border-radius: 50% / 60%;
+  opacity: 0.7;
+  animation: float 12s linear infinite;
+}
+
+.blood-cell:nth-child(even) {
+  width: 35px;
+  height: 22px;
+  animation-duration: 10s;
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(-900px);
+    opacity: 0;
+  }
+}
+
+h2 {
+  color: #ff4b4b;
+  text-shadow: 0 0 20px rgba(255, 0, 0, 0.6);
+  position: relative;
+  z-index: 2;
+}
+
+.donor-list {
+  position: relative;
+  z-index: 2;
+  width: 90%;
+  max-width: 600px;
+  margin-top: 25px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.donor-card {
+  background: rgba(60, 0, 0, 0.7);
+  border-radius: 16px;
+  padding: 15px;
+  box-shadow: 0 0 25px rgba(255, 0, 0, 0.3);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.donor-card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 35px rgba(255, 30, 30, 0.6);
+}
+
+h3 {
+  color: #ff6666;
+  margin-bottom: 5px;
+}
+
+.msg {
+  position: relative;
+  z-index: 2;
+  margin-top: 20px;
+  color: #ffb3b3;
+}

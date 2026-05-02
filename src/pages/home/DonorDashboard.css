@@ -1,0 +1,141 @@
+.dashboard-container {
+  min-height: 100vh;
+  background: radial-gradient(circle, #200000, #000);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px;
+}
+
+.dashboard-title {
+  color: #ff4d4d;
+  text-shadow: 0 0 10px #ff0000;
+  font-size: 2rem;
+  margin-bottom: 30px;
+}
+
+/* 🔍 Search & Filter Section */
+.filter-section {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 30px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.filter-input,
+.filter-select {
+  padding: 12px 15px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  font-size: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  width: 220px;
+  transition: 0.3s;
+}
+
+.filter-input::placeholder {
+  color: #ccc;
+}
+
+.filter-select {
+  cursor: pointer;
+  color: #ff4d4d;
+  background: rgba(255, 0, 0, 0.15);
+}
+
+.filter-input:focus,
+.filter-select:focus {
+  box-shadow: 0 0 10px rgba(255, 0, 0, 0.6);
+}
+
+/* 🩸 Donor List */
+.donor-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  width: 100%;
+  max-width: 1000px;
+}
+
+.donor-card {
+  background: rgba(255, 0, 0, 0.1);
+  border: 1px solid rgba(255, 0, 0, 0.4);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 0 15px rgba(255, 0, 0, 0.3);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.donor-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 25px rgba(255, 0, 0, 0.6);
+}
+
+.no-donors {
+  color: #ccc;
+  font-size: 1.2rem;
+  text-align: center;
+}
+
+/* 🔙 Back Button */
+.back-button {
+  margin-top: 30px;
+  background: linear-gradient(90deg, #8b0000, #ff0000);
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.back-button:hover {
+  box-shadow: 0 0 15px rgba(255, 0, 0, 0.6);
+}
+
+.filter-section {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 25px;
+}
+
+.filter-input,
+.filter-select {
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 1rem;
+}
+
+.search-button,
+.reset-button {
+  background: linear-gradient(90deg, #8b0000, #ff0000);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.search-button:hover,
+.reset-button:hover {
+  box-shadow: 0 0 15px rgba(255, 0, 0, 0.6);
+}
+
+.no-donors {
+  color: #ccc;
+  font-size: 1.1rem;
+  margin-top: 20px;
+}

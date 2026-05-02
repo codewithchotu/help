@@ -1,0 +1,44 @@
+.register-donor-page {
+  text-align: center;
+  padding: 50px;
+  background: #fff5f5;
+  min-height: 100vh;
+}
+
+.register-donor-page h1 {
+  color: #c62828;
+  margin-bottom: 10px;
+}
+
+.register-donor-page p {
+  color: #555;
+  margin-bottom: 20px;
+}
+
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 300px;
+  margin: 0 auto;
+}
+
+.register-form input {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
+.register-form button {
+  padding: 10px;
+  background-color: #c62828;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.register-form button:hover {
+  background-color: #b71c1c;
+}
