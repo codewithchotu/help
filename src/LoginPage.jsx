@@ -1,349 +1,448 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Droplet, Mail, Lock, ArrowRight, Loader } from "lucide-react";
+import { Droplet, Mail, Lock, ArrowRight, Loader, Eye, EyeOff } from "lucide-react";
 import { auth } from "./firebaseConfig";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  sendEmailVerification
+  GoogleAuthProvider,
+  signInWithPopup,
 } from "firebase/auth";
 
+const googleProvider = new GoogleAuthProvider();
+
 export default function LoginPageComponent() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLogin, setIsLogin] = useState(true);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [view, setView]           = useState("main");   // "main" | "email"
+  const [isSignUp, setIsSignUp]   = useState(false);
+  const [email, setEmail]         = useState("");
+  const [password, setPassword]   = useState("");
+  const [showPass, setShowPass]   = useState(false);
+  const [loading, setLoading]     = useState(false);
+  const [gLoading, setGLoading]   = useState(false);
+  const [error, setError]         = useState("");
   const navigate = useNavigate();
 
-  const getErrorMessage = (code) => {
+  const friendlyError = (code) => {
     switch (code) {
-      case "auth/user-not-found": return "No account found with this email.";
-      case "auth/wrong-password": return "Incorrect password. Please try again.";
-      case "auth/email-already-in-use": return "This email is already registered. Please log in.";
-      case "auth/weak-password": return "Password must be at least 6 characters.";
-      case "auth/invalid-email": return "Please enter a valid email address.";
-      case "auth/too-many-requests": return "Too many failed attempts. Please try again later.";
-      case "auth/invalid-credential": return "Invalid email or password.";
-      default: return "Something went wrong. Please try again.";
+      case "auth/user-not-found":        return "No account found with this email.";
+      case "auth/wrong-password":        return "Incorrect password. Please try again.";
+      case "auth/email-already-in-use":  return "Email already registered. Please log in.";
+      case "auth/weak-password":         return "Password must be at least 6 characters.";
+      case "auth/invalid-email":         return "Please enter a valid email address.";
+      case "auth/too-many-requests":     return "Too many attempts. Try again later.";
+      case "auth/invalid-credential":    return "Invalid email or password.";
+      case "auth/popup-closed-by-user":  return "Google sign-in was cancelled.";
+      default:                           return "Something went wrong. Please try again.";
     }
   };
 
-  const handleSubmit = async (e) => {
+  // ── Google Sign-In ────────────────────────────────────────────────────────
+  const handleGoogle = async () => {
+    setError("");
+    setGLoading(true);
+    try {
+      await signInWithPopup(auth, googleProvider);
+      navigate("/home");
+    } catch (err) {
+      setError(friendlyError(err.code));
+    }
+    setGLoading(false);
+  };
+
+  // ── Email / Password ──────────────────────────────────────────────────────
+  const handleEmailSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
-
     try {
-      if (isLogin) {
-        await signInWithEmailAndPassword(auth, email, password);
-        navigate("/home");
+      if (isSignUp) {
+        await createUserWithEmailAndPassword(auth, email, password);
       } else {
-        if (password.length < 6) {
-          setError("Password must be at least 6 characters.");
-          setLoading(false);
-          return;
-        }
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        await sendEmailVerification(userCredential.user);
-        navigate("/home");
+        await signInWithEmailAndPassword(auth, email, password);
       }
+      navigate("/home");
     } catch (err) {
-      setError(getErrorMessage(err.code));
+      setError(friendlyError(err.code));
     }
-
     setLoading(false);
   };
 
-  const containerStyle = {
-    minHeight: "100vh",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    background: "#020202",
-    position: "relative",
-    overflow: "hidden",
-    padding: "20px",
-    fontFamily: "'Outfit', sans-serif",
-    color: "white"
-  };
-
   return (
-    <div style={containerStyle} className="login-full-page-v4">
+    <div className="ll-page">
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;800&display=swap');
 
-        .login-full-page-v4 * {
-          box-sizing: border-box;
-          margin: 0;
-          padding: 0;
-        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        .login-bg-decoration {
-          position: absolute;
-          inset: 0;
-          z-index: 1;
-          background: radial-gradient(circle at 50% 50%, #1a1a2e 0%, #020202 100%);
-        }
-
-        .blob {
-          position: absolute;
-          border-radius: 50%;
-          filter: blur(80px);
-          animation: float 20s infinite alternate;
-          opacity: 0.4;
-        }
-
-        .blob-1 {
-          width: 400px;
-          height: 400px;
-          background: #e11d48;
-          top: -100px;
-          left: -100px;
-        }
-
-        .blob-2 {
-          width: 300px;
-          height: 300px;
-          background: #9f1239;
-          bottom: -50px;
-          right: -50px;
-          animation-delay: -5s;
-        }
-
-        @keyframes float {
-          from { transform: translate(0, 0) scale(1); }
-          to { transform: translate(50px, 100px) scale(1.1); }
-        }
-
-        .login-glass-container {
-          position: relative;
-          z-index: 10;
-          width: 100%;
-          max-width: 440px;
-          animation: boxReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .login-box-v4 {
-          background: rgba(20, 20, 25, 0.7) !important;
-          backdrop-filter: blur(40px) saturate(180%) !important;
-          border: 1px solid rgba(255, 255, 255, 0.1) !important;
-          border-radius: 32px !important;
-          padding: 3.5rem 2.5rem !important;
-          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
-          text-align: center !important;
-        }
-
-        @keyframes boxReveal {
-          from { opacity: 0; transform: translateY(40px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-
-        .login-logo-circle {
-          width: 64px;
-          height: 64px;
-          background: #e11d48;
-          border-radius: 18px;
+        .ll-page {
+          min-height: 100vh;
           display: flex;
           align-items: center;
           justify-content: center;
-          margin: 0 auto 1.5rem;
-          box-shadow: 0 10px 20px rgba(225, 29, 72, 0.3);
+          background: #06060a;
+          font-family: 'Outfit', sans-serif;
+          color: #fff;
+          padding: 24px;
+          position: relative;
+          overflow: hidden;
         }
 
-        .login-box-v4 h1 {
-          font-size: 2.5rem !important;
-          font-weight: 800 !important;
-          margin-bottom: 0.5rem !important;
-          background: linear-gradient(to right, #fff, #94a3b8) !important;
-          -webkit-background-clip: text !important;
-          -webkit-text-fill-color: transparent !important;
-          color: white !important;
-          text-shadow: none !important;
-          letter-spacing: -1px !important;
+        /* Ambient blobs */
+        .ll-blob {
+          position: absolute;
+          border-radius: 50%;
+          filter: blur(100px);
+          opacity: 0.35;
+          pointer-events: none;
+        }
+        .ll-blob-1 { width: 500px; height: 500px; background: #e11d48; top: -180px; left: -180px; animation: blobFloat 18s infinite alternate; }
+        .ll-blob-2 { width: 350px; height: 350px; background: #9f1239; bottom: -120px; right: -120px; animation: blobFloat 22s infinite alternate-reverse; }
+        @keyframes blobFloat {
+          from { transform: translate(0,0) scale(1); }
+          to   { transform: translate(60px, 80px) scale(1.1); }
         }
 
-        .login-box-v4 p.tagline {
-          color: #94a3b8 !important;
-          font-size: 1rem !important;
-          margin-bottom: 2rem !important;
-          background: none !important;
-          -webkit-text-fill-color: initial !important;
+        /* Card */
+        .ll-card {
+          position: relative;
+          z-index: 10;
+          width: 100%;
+          max-width: 420px;
+          background: rgba(18, 18, 24, 0.75);
+          backdrop-filter: blur(40px) saturate(160%);
+          border: 1px solid rgba(255,255,255,0.09);
+          border-radius: 28px;
+          padding: 2.8rem 2.2rem;
+          box-shadow: 0 30px 60px -10px rgba(0,0,0,0.6);
+          animation: cardIn 0.7s cubic-bezier(0.16,1,0.3,1) both;
+        }
+        @keyframes cardIn {
+          from { opacity: 0; transform: translateY(36px); }
+          to   { opacity: 1; transform: translateY(0); }
         }
 
-        .login-form-v4 {
-          display: flex !important;
-          flex-direction: column !important;
-          gap: 1rem !important;
-          background: none !important;
-          padding: 0 !important;
-          box-shadow: none !important;
-          width: 100% !important;
+        /* Logo */
+        .ll-logo {
+          width: 56px; height: 56px;
+          background: linear-gradient(135deg, #e11d48, #9f1239);
+          border-radius: 16px;
+          display: flex; align-items: center; justify-content: center;
+          margin: 0 auto 1.2rem;
+          box-shadow: 0 8px 24px rgba(225,29,72,0.35);
         }
 
-        .input-field-v4 {
-          position: relative !important;
-          width: 100% !important;
+        .ll-title {
+          font-size: 1.9rem;
+          font-weight: 800;
+          text-align: center;
+          letter-spacing: -0.5px;
+          background: linear-gradient(to right, #fff 60%, #94a3b8);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          margin-bottom: 0.3rem;
+        }
+        .ll-subtitle {
+          text-align: center;
+          color: #64748b;
+          font-size: 0.92rem;
+          margin-bottom: 1.8rem;
         }
 
-        .input-field-v4 svg {
-          position: absolute !important;
-          left: 16px !important;
-          top: 50% !important;
-          transform: translateY(-50%) !important;
-          color: #64748b !important;
-          z-index: 2 !important;
+        /* Social buttons */
+        .ll-social-btn {
+          width: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 12px;
+          padding: 14px 20px;
+          border-radius: 14px;
+          border: 1px solid rgba(255,255,255,0.12);
+          background: rgba(255,255,255,0.05);
+          color: #e2e8f0;
+          font-size: 0.97rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.25s;
+          margin-bottom: 10px;
+          font-family: 'Outfit', sans-serif;
+        }
+        .ll-social-btn:hover:not(:disabled) {
+          background: rgba(255,255,255,0.1);
+          border-color: rgba(255,255,255,0.2);
+          transform: translateY(-1px);
+        }
+        .ll-social-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        /* Divider */
+        .ll-divider {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin: 1.2rem 0;
+          color: #334155;
+          font-size: 0.85rem;
+        }
+        .ll-divider::before, .ll-divider::after {
+          content: '';
+          flex: 1;
+          height: 1px;
+          background: rgba(255,255,255,0.08);
         }
 
-        .input-field-v4 input {
-          width: 100% !important;
-          background: rgba(255, 255, 255, 0.05) !important;
-          border: 1px solid rgba(255, 255, 255, 0.1) !important;
-          border-radius: 16px !important;
-          padding: 16px 16px 16px 48px !important;
-          color: white !important;
-          font-size: 1rem !important;
-          outline: none !important;
-          transition: 0.3s !important;
-          margin: 0 !important;
+        /* Email link button */
+        .ll-email-link {
+          width: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+          padding: 14px 20px;
+          border-radius: 14px;
+          border: 1px solid rgba(255,255,255,0.12);
+          background: rgba(255,255,255,0.05);
+          color: #e11d48;
+          font-size: 0.97rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.25s;
+          font-family: 'Outfit', sans-serif;
+        }
+        .ll-email-link:hover {
+          background: rgba(225,29,72,0.08);
+          border-color: rgba(225,29,72,0.3);
+          transform: translateY(-1px);
         }
 
-        .input-field-v4 input:focus {
-          border-color: #e11d48 !important;
-          background: rgba(225, 29, 72, 0.05) !important;
-          box-shadow: 0 0 0 4px rgba(225, 29, 72, 0.1) !important;
-        }
+        /* Email form */
+        .ll-form { display: flex; flex-direction: column; gap: 12px; }
 
-        .login-cta-v4 {
-          background: #e11d48 !important;
-          color: white !important;
-          border: none !important;
-          border-radius: 16px !important;
-          padding: 18px !important;
-          font-size: 1.1rem !important;
-          font-weight: 700 !important;
-          cursor: pointer !important;
-          display: flex !important;
-          align-items: center !important;
-          justify-content: center !important;
-          gap: 10px !important;
-          transition: 0.3s !important;
-          margin-top: 0.5rem !important;
-          width: 100% !important;
-          box-shadow: 0 10px 20px rgba(225, 29, 72, 0.3) !important;
+        .ll-input-wrap {
+          position: relative;
         }
-
-        .login-cta-v4:hover:not(:disabled) {
-          background: #be123c !important;
-          transform: translateY(-2px) !important;
-          box-shadow: 0 15px 25px rgba(225, 29, 72, 0.4) !important;
+        .ll-input-wrap svg.ll-icon {
+          position: absolute;
+          left: 14px; top: 50%;
+          transform: translateY(-50%);
+          color: #475569;
+          pointer-events: none;
         }
-
-        .login-cta-v4:disabled {
-          opacity: 0.7 !important;
-          cursor: not-allowed !important;
+        .ll-input-wrap input {
+          width: 100%;
+          padding: 14px 14px 14px 44px;
+          background: rgba(255,255,255,0.05);
+          border: 1px solid rgba(255,255,255,0.1);
+          border-radius: 14px;
+          color: #fff;
+          font-size: 0.97rem;
+          font-family: 'Outfit', sans-serif;
+          outline: none;
+          transition: 0.25s;
         }
+        .ll-input-wrap input::placeholder { color: #475569; }
+        .ll-input-wrap input:focus {
+          border-color: #e11d48;
+          background: rgba(225,29,72,0.04);
+          box-shadow: 0 0 0 3px rgba(225,29,72,0.12);
+        }
+        .ll-eye-btn {
+          position: absolute;
+          right: 14px; top: 50%;
+          transform: translateY(-50%);
+          background: none;
+          border: none;
+          color: #475569;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          padding: 0;
+        }
+        .ll-eye-btn:hover { color: #94a3b8; }
 
-        .error-msg {
-          background: rgba(225, 29, 72, 0.1);
-          border: 1px solid rgba(225, 29, 72, 0.3);
+        /* Submit */
+        .ll-submit {
+          width: 100%;
+          padding: 15px;
+          background: linear-gradient(135deg, #e11d48, #9f1239);
+          border: none;
+          border-radius: 14px;
+          color: #fff;
+          font-size: 1rem;
+          font-weight: 700;
+          font-family: 'Outfit', sans-serif;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          transition: 0.25s;
+          box-shadow: 0 8px 20px rgba(225,29,72,0.3);
+          margin-top: 2px;
+        }
+        .ll-submit:hover:not(:disabled) {
+          transform: translateY(-2px);
+          box-shadow: 0 12px 28px rgba(225,29,72,0.4);
+        }
+        .ll-submit:disabled { opacity: 0.65; cursor: not-allowed; }
+
+        /* Error */
+        .ll-error {
+          background: rgba(225,29,72,0.1);
+          border: 1px solid rgba(225,29,72,0.3);
           border-radius: 12px;
-          padding: 12px 16px;
+          padding: 11px 14px;
           color: #fca5a5;
-          font-size: 0.9rem;
-          text-align: left;
+          font-size: 0.88rem;
         }
 
-        .login-footer-v4 {
-          margin-top: 2rem !important;
-          font-size: 0.9rem !important;
-          color: #64748b !important;
-        }
-
-        .login-footer-v4 .toggle-link {
-          color: #e11d48 !important;
-          font-weight: 600 !important;
-          cursor: pointer !important;
-          transition: 0.2s !important;
-          -webkit-text-fill-color: #e11d48 !important;
+        /* Back link */
+        .ll-back {
+          background: none;
+          border: none;
+          color: #64748b;
+          font-size: 0.88rem;
+          font-family: 'Outfit', sans-serif;
+          cursor: pointer;
+          padding: 0;
+          margin-top: 1.4rem;
           display: block;
-          margin-bottom: 8px;
+          width: 100%;
+          text-align: center;
+          transition: color 0.2s;
         }
+        .ll-back:hover { color: #94a3b8; }
 
-        .login-footer-v4 .toggle-link:hover {
-          color: #be123c !important;
-          -webkit-text-fill-color: #be123c !important;
+        /* Toggle sign up / login */
+        .ll-toggle {
+          margin-top: 1.2rem;
+          text-align: center;
+          color: #64748b;
+          font-size: 0.88rem;
         }
+        .ll-toggle span {
+          color: #e11d48;
+          font-weight: 600;
+          cursor: pointer;
+          -webkit-text-fill-color: #e11d48;
+        }
+        .ll-toggle span:hover { opacity: 0.8; }
 
-        .spin {
-          animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
+        .spin { animation: spin 0.9s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
       `}</style>
 
-      <div className="login-bg-decoration">
-        <div className="blob blob-1"></div>
-        <div className="blob blob-2"></div>
-      </div>
-      
-      <div className="login-glass-container">
-        <div className="login-box-v4">
-          <div className="login-logo-circle">
-            <Droplet size={32} fill="white" color="white" />
-          </div>
-          <h1>LifeLine</h1>
-          <p className="tagline">
-            {isLogin ? "Every drop counts. Sign in to save lives." : "Join our community. Create your account."}
-          </p>
+      {/* Ambient blobs */}
+      <div className="ll-blob ll-blob-1" />
+      <div className="ll-blob ll-blob-2" />
 
-          <form className="login-form-v4" onSubmit={handleSubmit}>
-            <div className="input-field-v4">
+      <div className="ll-card">
+        {/* Logo + heading */}
+        <div className="ll-logo">
+          <Droplet size={28} fill="white" color="white" />
+        </div>
+        <h1 className="ll-title">LifeLine</h1>
+        <p className="ll-subtitle">
+          {view === "email"
+            ? (isSignUp ? "Create your account" : "Sign in with your email")
+            : "Every drop counts. Sign in to save lives."}
+        </p>
+
+        {error && <div className="ll-error" style={{ marginBottom: "14px" }}>⚠️ {error}</div>}
+
+        {/* ── MAIN VIEW ── */}
+        {view === "main" && (
+          <>
+            {/* Google */}
+            <button className="ll-social-btn" onClick={handleGoogle} disabled={gLoading}>
+              {gLoading ? (
+                <Loader size={18} className="spin" />
+              ) : (
+                <svg width="18" height="18" viewBox="0 0 48 48">
+                  <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                  <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                  <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                  <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.36-8.16 2.36-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                </svg>
+              )}
+              {gLoading ? "Signing in…" : "Log in with Google"}
+            </button>
+
+            {/* Divider */}
+            <div className="ll-divider">or</div>
+
+            {/* Email option */}
+            <button
+              className="ll-email-link"
+              onClick={() => { setView("email"); setIsSignUp(false); setError(""); }}
+            >
               <Mail size={18} />
+              Log in with Email
+            </button>
+
+            <div className="ll-toggle" style={{ marginTop: "1.4rem" }}>
+              No account yet?{" "}
+              <span onClick={() => { setView("email"); setIsSignUp(true); setError(""); }}>
+                Sign up
+              </span>
+            </div>
+          </>
+        )}
+
+        {/* ── EMAIL VIEW ── */}
+        {view === "email" && (
+          <form className="ll-form" onSubmit={handleEmailSubmit}>
+            <div className="ll-input-wrap">
+              <Mail size={17} className="ll-icon" />
               <input
                 type="email"
-                placeholder="Email Address"
+                placeholder="Email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 autoComplete="email"
+                autoFocus
               />
             </div>
 
-            <div className="input-field-v4">
-              <Lock size={18} />
+            <div className="ll-input-wrap">
+              <Lock size={17} className="ll-icon" />
               <input
-                type="password"
-                placeholder={isLogin ? "Password" : "Password (min 6 characters)"}
+                type={showPass ? "text" : "password"}
+                placeholder={isSignUp ? "Password (min 6 chars)" : "Password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                autoComplete={isLogin ? "current-password" : "new-password"}
+                autoComplete={isSignUp ? "new-password" : "current-password"}
               />
+              <button
+                type="button"
+                className="ll-eye-btn"
+                onClick={() => setShowPass(!showPass)}
+                tabIndex={-1}
+              >
+                {showPass ? <EyeOff size={17} /> : <Eye size={17} />}
+              </button>
             </div>
 
-            {error && <div className="error-msg">⚠️ {error}</div>}
-
-            <button type="submit" className="login-cta-v4" disabled={loading}>
+            <button type="submit" className="ll-submit" disabled={loading}>
               {loading
-                ? <><Loader size={18} className="spin" /> Please wait...</>
-                : <>{isLogin ? "Log In" : "Create Account"} <ArrowRight size={18} /></>
+                ? <><Loader size={17} className="spin" /> Please wait…</>
+                : <>{isSignUp ? "Create Account" : "Log In"} <ArrowRight size={17} /></>
               }
             </button>
-          </form>
 
-          <div className="login-footer-v4">
-            <span
-              className="toggle-link"
-              onClick={() => { setIsLogin(!isLogin); setError(""); }}
-            >
-              {isLogin ? "Don't have an account? Sign Up" : "Already have an account? Log In"}
-            </span>
-          </div>
-        </div>
+            <div className="ll-toggle">
+              {isSignUp ? "Already have an account? " : "Don't have an account? "}
+              <span onClick={() => { setIsSignUp(!isSignUp); setError(""); }}>
+                {isSignUp ? "Log In" : "Sign Up"}
+              </span>
+            </div>
+
+            <button type="button" className="ll-back" onClick={() => { setView("main"); setError(""); }}>
+              ← Back to all sign-in options
+            </button>
+          </form>
+        )}
       </div>
     </div>
   );
