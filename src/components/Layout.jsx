@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Droplet, Home, UserPlus, Search, Map as MapIcon, LogOut, Activity } from "lucide-react";
-import logo from "../assets/logo.svg";
+import logo from "url:../assets/logo.svg";
 
 export default function Layout({ children }) {
   const navigate = useNavigate();
