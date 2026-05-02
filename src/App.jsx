@@ -5,7 +5,7 @@ import Login from "./LoginPage";
 import Home from "./pages/home/Home";
 import RegisterDonor from "./pages/home/RegisterDonor";
 import RequestBlood from "./pages/request/RequestBlood";
-import ViewDonor from "./pages/donor/ViewDonor";
+import ViewDonor from "./pages/donor/viewDonor";
 import ViewRequests from "./pages/home/ViewRequests";
 import MapPage from "./pages/home/MapPage";
 import Layout from "./components/Layout";
