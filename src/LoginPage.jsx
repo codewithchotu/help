@@ -1,41 +1,58 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Droplet, Mail, Lock, ArrowRight } from "lucide-react";
+import { Droplet, Mail, Lock, ArrowRight, Loader } from "lucide-react";
+import { auth } from "./firebaseConfig";
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  sendEmailVerification
+} from "firebase/auth";
 
 export default function LoginPageComponent() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLogin, setIsLogin] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const [isLogin, setIsLogin] = useState(true);
+  const getErrorMessage = (code) => {
+    switch (code) {
+      case "auth/user-not-found": return "No account found with this email.";
+      case "auth/wrong-password": return "Incorrect password. Please try again.";
+      case "auth/email-already-in-use": return "This email is already registered. Please log in.";
+      case "auth/weak-password": return "Password must be at least 6 characters.";
+      case "auth/invalid-email": return "Please enter a valid email address.";
+      case "auth/too-many-requests": return "Too many failed attempts. Please try again later.";
+      case "auth/invalid-credential": return "Invalid email or password.";
+      default: return "Something went wrong. Please try again.";
+    }
+  };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const users = JSON.parse(localStorage.getItem('mockUsers') || '[]');
+    setError("");
+    setLoading(true);
 
-    if (isLogin) {
-      // Login Logic
-      if (email === "admin@gmail.com" && password === "admin123") {
+    try {
+      if (isLogin) {
+        await signInWithEmailAndPassword(auth, email, password);
         navigate("/home");
       } else {
-        const user = users.find(u => u.email === email && u.password === password);
-        if (user) {
-          navigate("/home");
-        } else {
-          alert("❌ Invalid credentials! Please check your email and password.");
+        if (password.length < 6) {
+          setError("Password must be at least 6 characters.");
+          setLoading(false);
+          return;
         }
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        await sendEmailVerification(userCredential.user);
+        navigate("/home");
       }
-    } else {
-      // Sign Up Logic
-      if (users.find(u => u.email === email)) {
-        alert("⚠️ Account already exists with this email. Please log in.");
-        return;
-      }
-      users.push({ email, password });
-      localStorage.setItem('mockUsers', JSON.stringify(users));
-      alert("✅ Account created successfully! Logging you in...");
-      navigate("/home");
+    } catch (err) {
+      setError(getErrorMessage(err.code));
     }
+
+    setLoading(false);
   };
 
   const containerStyle = {
@@ -148,8 +165,8 @@ export default function LoginPageComponent() {
 
         .login-box-v4 p.tagline {
           color: #94a3b8 !important;
-          font-size: 1.1rem !important;
-          margin-bottom: 2.5rem !important;
+          font-size: 1rem !important;
+          margin-bottom: 2rem !important;
           background: none !important;
           -webkit-text-fill-color: initial !important;
         }
@@ -157,7 +174,7 @@ export default function LoginPageComponent() {
         .login-form-v4 {
           display: flex !important;
           flex-direction: column !important;
-          gap: 1.25rem !important;
+          gap: 1rem !important;
           background: none !important;
           padding: 0 !important;
           box-shadow: none !important;
@@ -216,26 +233,55 @@ export default function LoginPageComponent() {
           box-shadow: 0 10px 20px rgba(225, 29, 72, 0.3) !important;
         }
 
-        .login-cta-v4:hover {
+        .login-cta-v4:hover:not(:disabled) {
           background: #be123c !important;
           transform: translateY(-2px) !important;
           box-shadow: 0 15px 25px rgba(225, 29, 72, 0.4) !important;
         }
 
+        .login-cta-v4:disabled {
+          opacity: 0.7 !important;
+          cursor: not-allowed !important;
+        }
+
+        .error-msg {
+          background: rgba(225, 29, 72, 0.1);
+          border: 1px solid rgba(225, 29, 72, 0.3);
+          border-radius: 12px;
+          padding: 12px 16px;
+          color: #fca5a5;
+          font-size: 0.9rem;
+          text-align: left;
+        }
+
         .login-footer-v4 {
-          margin-top: 2.5rem !important;
+          margin-top: 2rem !important;
           font-size: 0.9rem !important;
           color: #64748b !important;
         }
 
-        .login-footer-v4 p {
-          color: #64748b !important;
+        .login-footer-v4 .toggle-link {
+          color: #e11d48 !important;
+          font-weight: 600 !important;
+          cursor: pointer !important;
+          transition: 0.2s !important;
+          -webkit-text-fill-color: #e11d48 !important;
+          display: block;
+          margin-bottom: 8px;
         }
 
-        .login-footer-v4 span {
-          color: #94a3b8 !important;
-          font-family: monospace !important;
-          font-weight: 600 !important;
+        .login-footer-v4 .toggle-link:hover {
+          color: #be123c !important;
+          -webkit-text-fill-color: #be123c !important;
+        }
+
+        .spin {
+          animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
         }
       `}</style>
 
@@ -251,7 +297,7 @@ export default function LoginPageComponent() {
           </div>
           <h1>LifeLine</h1>
           <p className="tagline">
-            {isLogin ? "Every drop counts. Sign in to save lives." : "Join our community. Create an account today."}
+            {isLogin ? "Every drop counts. Sign in to save lives." : "Join our community. Create your account."}
           </p>
 
           <form className="login-form-v4" onSubmit={handleSubmit}>
@@ -263,6 +309,7 @@ export default function LoginPageComponent() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                autoComplete="email"
               />
             </div>
 
@@ -270,26 +317,31 @@ export default function LoginPageComponent() {
               <Lock size={18} />
               <input
                 type="password"
-                placeholder="Password"
+                placeholder={isLogin ? "Password" : "Password (min 6 characters)"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                autoComplete={isLogin ? "current-password" : "new-password"}
               />
             </div>
 
-            <button type="submit" className="login-cta-v4">
-              {isLogin ? "Log In" : "Create Account"} <ArrowRight size={18} />
+            {error && <div className="error-msg">⚠️ {error}</div>}
+
+            <button type="submit" className="login-cta-v4" disabled={loading}>
+              {loading
+                ? <><Loader size={18} className="spin" /> Please wait...</>
+                : <>{isLogin ? "Log In" : "Create Account"} <ArrowRight size={18} /></>
+              }
             </button>
           </form>
 
           <div className="login-footer-v4">
-            <p 
-              onClick={() => setIsLogin(!isLogin)}
-              style={{ cursor: "pointer", color: "#e11d48", fontWeight: "600", marginBottom: "12px", transition: "0.3s" }}
+            <span
+              className="toggle-link"
+              onClick={() => { setIsLogin(!isLogin); setError(""); }}
             >
               {isLogin ? "Don't have an account? Sign Up" : "Already have an account? Log In"}
-            </p>
-            {isLogin && <p>Demo: <span>admin@gmail.com / admin123</span></p>}
+            </span>
           </div>
         </div>
       </div>
