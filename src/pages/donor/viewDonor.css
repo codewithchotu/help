@@ -1,92 +1,102 @@
-.page-container {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  background: radial-gradient(circle at center, #3b0000 0%, #1a0000 100%);
-  overflow: hidden;
-  color: white;
-  font-family: "Poppins", sans-serif;
-  position: relative;
-  padding: 40px 0;
+.donors-page {
+  animation: fadeIn 0.6s ease-out;
 }
 
-/* 🔴 Floating oval blood cells */
-.blood-bg {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  z-index: 0;
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.blood-cell {
-  position: absolute;
-  bottom: -100px;
-  width: 45px;
-  height: 28px;
-  background: radial-gradient(circle at 30% 30%, #ff4d4d, #660000);
-  border-radius: 50% / 60%;
-  opacity: 0.7;
-  animation: float 12s linear infinite;
+.donors-page h1 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(to right, #fff, #94a3b8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-.blood-cell:nth-child(even) {
-  width: 35px;
-  height: 22px;
-  animation-duration: 10s;
-}
-
-@keyframes float {
-  0% {
-    transform: translateY(0);
-    opacity: 0.8;
-  }
-  100% {
-    transform: translateY(-900px);
-    opacity: 0;
-  }
-}
-
-h2 {
-  color: #ff4b4b;
-  text-shadow: 0 0 20px rgba(255, 0, 0, 0.6);
-  position: relative;
-  z-index: 2;
+.donors-page p.subtitle {
+  color: #94a3b8;
+  font-size: 1.1rem;
+  margin-bottom: 2.5rem;
 }
 
 .donor-list {
-  position: relative;
-  z-index: 2;
-  width: 90%;
-  max-width: 600px;
-  margin-top: 25px;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
 }
 
 .donor-card {
-  background: rgba(60, 0, 0, 0.7);
-  border-radius: 16px;
-  padding: 15px;
-  box-shadow: 0 0 25px rgba(255, 0, 0, 0.3);
-  transition: transform 0.3s, box-shadow 0.3s;
+  background: rgba(20, 20, 25, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  padding: 1.75rem;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.donor-card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 4px;
+  background: linear-gradient(to right, #e11d48, #be123c);
 }
 
 .donor-card:hover {
-  transform: scale(1.02);
-  box-shadow: 0 0 35px rgba(255, 30, 30, 0.6);
+  transform: translateY(-6px);
+  border-color: rgba(225, 29, 72, 0.4);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 25px rgba(225, 29, 72, 0.15);
 }
 
-h3 {
-  color: #ff6666;
-  margin-bottom: 5px;
+.donor-card h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #f8fafc;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.donor-card h3::before {
+  content: "🩸";
+  font-size: 1.1rem;
+}
+
+.donor-card p {
+  color: #94a3b8;
+  font-size: 0.95rem;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.donor-card p strong {
+  color: #e2e8f0;
+  font-weight: 600;
+  min-width: 90px;
+}
+
+.blood-badge {
+  display: inline-block;
+  background: rgba(225, 29, 72, 0.15);
+  color: #e11d48;
+  border: 1px solid rgba(225, 29, 72, 0.3);
+  border-radius: 100px;
+  padding: 3px 12px;
+  font-weight: 700;
+  font-size: 0.9rem;
 }
 
 .msg {
-  position: relative;
-  z-index: 2;
-  margin-top: 20px;
-  color: #ffb3b3;
+  color: #94a3b8;
+  text-align: center;
+  margin-top: 2rem;
+  font-size: 1.1rem;
 }

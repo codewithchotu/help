@@ -12,9 +12,7 @@ export default function ViewDonors() {
       try {
         throw new Error("Bypassing Firebase manually");
       } catch (err) {
-        // Read dynamically registered donors from local storage
         const localDonors = JSON.parse(localStorage.getItem('mockDonors') || '[]');
-        
         setDonors([
           ...localDonors,
           { id: '1', name: "Rahul Sharma", blood: "A+", city: "Hyderabad", phone: "+91 98765 43210" },
@@ -27,14 +25,9 @@ export default function ViewDonors() {
   }, []);
 
   return (
-    <div className="page-container">
-      <div className="blood-bg">
-        {[...Array(15)].map((_, i) => (
-          <div key={i} className="blood-cell"></div>
-        ))}
-      </div>
-
-      <h2>🩸 Registered Donors</h2>
+    <div className="donors-page">
+      <h1>🩸 Registered Donors</h1>
+      <p className="subtitle">Browse available blood donors in your area and reach out directly.</p>
 
       <div className="donor-list">
         {donors.length === 0 ? (
@@ -43,7 +36,7 @@ export default function ViewDonors() {
           donors.map((donor) => (
             <div key={donor.id} className="donor-card">
               <h3>{donor.name}</h3>
-              <p><strong>Blood Group:</strong> {donor.blood}</p>
+              <p><strong>Blood Group:</strong> <span className="blood-badge">{donor.blood}</span></p>
               <p><strong>City:</strong> {donor.city}</p>
               <p><strong>Contact:</strong> {donor.phone}</p>
             </div>
